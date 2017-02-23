@@ -34,43 +34,31 @@ def GMatrix(size, bounds, condMap):
 
     return(G)
 
+def rhoVector(bounds):
+    rho = []
+    for bound in bounds :
+        if np.isnan(bound) or bound == -1:
+            rho.append(0)
+        else :
+            rho.append(bound)
+    return rho
 
-# Sample Inputs...
+def plotField(length, width, nLength, nWidth, field):
+    TMap = []
+    # Remap Results
+    for w in range(0,nWidth) :
+        row = []
+        for l in range(0,nLength) :
+            row.append(field[w*nLength+l])
+        TMap.append(row)
 
-bounds = [  5, np.nan, np.nan, np.nan, 0,
-            5, -1,     -1,     -1,     0,
-            5, -1,     -1,     -1,     0,
-            5, np.nan, np.nan, np.nan, 0]
-condMap = []
+    nx, ny = (nLength, nWidth)
+    x = np.linspace(0, length, nx)
+    y = np.linspace(0, width, ny)
+    xv, yv = np.meshgrid(x, y)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(xv,yv,TMap,rstride=1, cstride=1, cmap=cm.coolwarm,
+        linewidth=1, antialiased=False)
+    plt.show()
 
-rho = [     5, 0, 0, 0, 0,
-            5, 0, 0, 0, 0,
-            5, 0, 0, 0, 0,
-            5, 0, 0, 0, 0]
-
-G = GMatrix((5,4), bounds, condMap)
-
-T = np.dot(np.linalg.inv(G),rho)
-
-print(T)
-
-TMap = []
-# Remap Results
-for l in range(0,4) :
-    row = []
-    for i in range(0,5) :
-        row.append(T[l*5+i])
-    TMap.append(row)
-
-
-nx, ny = (5, 4)
-x = np.linspace(0, 5, nx)
-y = np.linspace(0, 4, ny)
-xv, yv = np.meshgrid(x, y)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(xv,yv,TMap,rstride=1, cstride=1, cmap=cm.coolwarm,
-    linewidth=1, antialiased=False)
-plt.show()
-#plt.imshow(TMap, cmap='hot', interpolation='nearest')
-#plt.show()
