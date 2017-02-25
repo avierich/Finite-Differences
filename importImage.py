@@ -13,4 +13,14 @@ def importBounds(filename) :
             else :
                 bounds.append(-1)
     return bounds
+
+def importCondImage(filename, minSigma) :
+    image = np.array(misc.imread(filename, flatten = True))
+
+    maxValue = image.max()
+    offset = (minSigma*maxValue)/(1-minSigma)
+    
+    return (image + offset-image.min()) / (maxValue + offset-image.min())
+
+#    return(image)/(maxValue)
     

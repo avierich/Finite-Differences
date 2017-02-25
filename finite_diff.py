@@ -1,7 +1,11 @@
 import matplotlib.pyplot as plt
+from scipy import misc
+from pylab import *
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from matplotlib.cbook import get_sample_data
+from matplotlib._png import read_png
 
 
 # a Nan in the bounds sets the derivative to zero
@@ -17,22 +21,53 @@ def GMatrix(size, bounds, condMap):
     for i in range(0,size) :
         if(np.isnan(bounds[i])): # Zero derivative bound
             if(i < length) : # Top Boundry
-                G[i][i] = -1
-                G[i][i+length] = 1
+                G[i][i] = -1.0
+                G[i][i+length] = 1.0
             else : # Assume bottom bound because I'm lazy
-                G[i][i] = -1
-                G[i][i-length] = 1
-        elif(bounds[i] != -1) :
+                G[i][i] = -1.0
+                G[i][i-length] = 1.0
+        elif(bounds[i] != -1) : # It is a source
             G[i][i] = 1
         else : # Not a B.C.
-            G[i][i] = -4
-            G[i][i-1] = 1
-            G[i][i+1] = 1
-            G[i][i-length] = 1
-            G[i][i+length] = 1
+            G[i][i] = -(condMap[i,i-1]+condMap[i,i+1]+condMap[i,i-length]+condMap[i,i+length])
+            G[i][i-1] = condMap[i,i-1]
+            G[i][i+1] = condMap[i,i+1]
+            G[i][i-length] = condMap[i,i-length]
+            G[i][i+length] = condMap[i,i+length]
             
 
     return(G)
+
+def condMap(image):
+    condDict = {}
+
+    length = len(image[0])
+    
+    for row in range(0,len(image)) :
+        for col in range (0,len(image[0])) :
+            upIndex = coordToInd(col,row-1, length)
+            downIndex = coordToInd(col,row+1, length)
+            centerIndex = coordToInd(col,row, length)
+            leftIndex = coordToInd(col-1,row, length)
+            rightIndex = coordToInd(col+1,row, length)
+
+            # Assign top bottom conductivity
+            if (row < len(image) - 1) : # There are items below
+                condDict[centerIndex,downIndex] = max(image[row][col],image[row+1,col])
+            if (row > 0) : # There are items above
+                condDict[centerIndex,upIndex] = max(image[row][col],image[row-1,col])
+
+            # Assign left right conductivity
+            if (col < len(image[0]) - 1) : # There are items to the right
+                condDict[centerIndex,rightIndex] = max(image[row][col],image[row,col+1])
+            if (col > 0) : # There are items to the left
+                condDict[centerIndex,leftIndex] = max(image[row][col],image[row,col-1])
+
+    return condDict
+                
+
+def coordToInd(x, y, length) :
+    return y*length + x
 
 def rhoVector(bounds):
     rho = []
@@ -43,7 +78,7 @@ def rhoVector(bounds):
             rho.append(bound)
     return rho
 
-def plotField(length, width, nLength, nWidth, field):
+def plotField(length, width, nLength, nWidth, field, imPath):
     TMap = []
     # Remap Results
     for w in range(0,nWidth) :
@@ -60,5 +95,12 @@ def plotField(length, width, nLength, nWidth, field):
     ax = fig.add_subplot(111, projection='3d')
     ax.plot_surface(xv,yv,TMap,rstride=1, cstride=1, cmap=cm.coolwarm,
         linewidth=1, antialiased=False)
+    img = misc.imread(imPath)/255.0
+#    fn = get_sample_data("lena.png", asfileobj=False)
+    #fn = open("trump-60x40.png")
+    #img = read_png(fn)
+    #x, y = ogrid[0:img.shape[0], 0:img.shape[1]]
+    ax = gca(projection='3d')
+    ax.plot_surface(xv, yv, -1, rstride=1, cstride=1, facecolors=img)
     plt.show()
 
