@@ -78,7 +78,9 @@ def rhoVector(bounds):
             rho.append(bound)
     return rho
 
-def plotField(length, width, nLength, nWidth, field, imPath):
+def plotPot(length, width, nLength, nWidth, field, imPath = ''):
+    
+
     TMap = []
     # Remap Results
     for w in range(0,nWidth) :
@@ -93,14 +95,59 @@ def plotField(length, width, nLength, nWidth, field, imPath):
     xv, yv = np.meshgrid(x, y)
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+    ax.set_title("Potential in x and y")
     ax.plot_surface(xv,yv,TMap,rstride=1, cstride=1, cmap=cm.coolwarm,
         linewidth=1, antialiased=False)
-    img = misc.imread(imPath)/255.0
-#    fn = get_sample_data("lena.png", asfileobj=False)
-    #fn = open("trump-60x40.png")
-    #img = read_png(fn)
-    #x, y = ogrid[0:img.shape[0], 0:img.shape[1]]
     ax = gca(projection='3d')
-    ax.plot_surface(xv, yv, -1, rstride=1, cstride=1, facecolors=img)
+    if imPath != '' :
+        img = misc.imread(imPath)/255.0
+        ax.plot_surface(xv, yv, -1, rstride=1, cstride=1, facecolors=img)
     plt.show()
 
+def plotField(length, width, nLength, nWidth, field):
+    
+    TMap = []
+    # Remap Results
+    for w in range(0,nWidth) :
+        row = []
+        for l in range(0,nLength) :
+            row.append(field[w*nLength+l])
+        TMap.append(row)
+
+    nx, ny = (nLength, nWidth)
+    x = np.linspace(0, length, nx)
+    y = np.linspace(0, width, ny)
+    xv, yv = np.meshgrid(x, y)
+
+    u,v = np.gradient(TMap)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title("Potential in x and y")
+    ax.quiver(xv,yv,-1*v,-1*u)
+    plt.show()
+
+
+def plotJ(length, width, nLength, nWidth, field, condMap):
+    
+    TMap = []
+    # Remap Results
+    for w in range(0,nWidth) :
+        row = []
+        for l in range(0,nLength) :
+            row.append(field[w*nLength+l])
+        TMap.append(row)
+
+    nx, ny = (nLength, nWidth)
+    x = np.linspace(0, length, nx)
+    y = np.linspace(0, width, ny)
+    xv, yv = np.meshgrid(x, y)
+
+    # Gradient of potential multiplied by the conductivity at that point 
+    u,v = np.gradient(np.multiply(TMap,condMap))
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title("Potential in x and y")
+    ax.quiver(xv,yv,-1*v,-1*u)
+    plt.show()
