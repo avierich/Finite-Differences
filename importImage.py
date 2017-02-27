@@ -16,7 +16,7 @@ def importBounds(filename) :
 
 def importCondImage(filename, minSigma) :
     image = np.array(misc.imread(filename, flatten = True))
-
+    image = np.flipud(image)
     maxValue = image.max()
     offset = (minSigma*maxValue)/(1-minSigma)
     

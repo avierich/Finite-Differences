@@ -53,15 +53,15 @@ def condMap(image):
 
             # Assign top bottom conductivity
             if (row < len(image) - 1) : # There are items below
-                condDict[centerIndex,downIndex] = max(image[row][col],image[row+1,col])
+                condDict[centerIndex,downIndex] = min(image[row][col],image[row+1,col])
             if (row > 0) : # There are items above
-                condDict[centerIndex,upIndex] = max(image[row][col],image[row-1,col])
+                condDict[centerIndex,upIndex] = min(image[row][col],image[row-1,col])
 
             # Assign left right conductivity
             if (col < len(image[0]) - 1) : # There are items to the right
-                condDict[centerIndex,rightIndex] = max(image[row][col],image[row,col+1])
+                condDict[centerIndex,rightIndex] = min(image[row][col],image[row,col+1])
             if (col > 0) : # There are items to the left
-                condDict[centerIndex,leftIndex] = max(image[row][col],image[row,col-1])
+                condDict[centerIndex,leftIndex] = min(image[row][col],image[row,col-1])
 
     return condDict
                 
@@ -123,7 +123,7 @@ def plotField(length, width, nLength, nWidth, field):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_title("Potential in x and y")
+    ax.set_title("E-Field in x and y")
     ax.quiver(xv,yv,-1*v,-1*u)
     plt.show()
 
@@ -148,6 +148,6 @@ def plotJ(length, width, nLength, nWidth, field, condMap):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_title("Potential in x and y")
+    ax.set_title("Current Density in x and y")
     ax.quiver(xv,yv,-1*v,-1*u)
     plt.show()
